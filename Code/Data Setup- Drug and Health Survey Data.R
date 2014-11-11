@@ -11,7 +11,7 @@ rm(list = ls())
 setwd("/Users/kentm/Desktop/_NW MSPA/6- Fall 2014/Pred412-GroupProject")
 
 # Load the data set
-load("Drug and Health Survey Data- 2012.RDA")
+load("Data/Drug and Health Survey Data- 2012.RDA")
 
 # Rename the dataframe
 raw.surveydf <- da34933.0001

@@ -18,7 +18,7 @@ raw.surveydf <- da34933.0001
 rm(da34933.0001)
 
 # Subset the dataframe with variables of interest.
-# We will rename them later
+# We can rename them later
 surveydf <- raw.surveydf[, c(
      
      # Nictone 
@@ -49,5 +49,8 @@ surveydf <- raw.surveydf[, c(
      "EMPSTATY", "COUTYP2", "BOOKED"  
 )]
 
-
+# Save the final data as a CSV and the workspace 
+# Load the workspace for analyses so the data structure is retained
+write.csv(surveydf, "Data/Final Data- Drug and Health Survey Data.csv")
+save.image("Data/Final Data- Drug and Health Survey Data.RData")
 

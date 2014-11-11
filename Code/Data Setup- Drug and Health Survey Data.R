@@ -49,6 +49,9 @@ surveydf <- raw.surveydf[, c(
      "EMPSTATY", "COUTYP2", "BOOKED"  
 )]
 
+# Drop the raw data set
+rm(raw.surveydf)
+
 # Save the final data as a CSV and the workspace 
 # Load the workspace for analyses so the data structure is retained
 write.csv(surveydf, "Data/Final Data- Drug and Health Survey Data.csv")

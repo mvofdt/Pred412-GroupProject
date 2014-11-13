@@ -25,7 +25,7 @@ surveydf <- raw.surveydf[, c(
      "IRCGIRTB", "IRCGCRV", "IRCGCRGP", "IRCGNCTL", "IRCGROUT", "IRCGINCR", 
      "IRCGSAT", "IRCGLMR", "IRCGRGDY", "IRCGRGWK", "IRCGRGNM", "IRCGNCG", 
      "IRCGSLHR", "IRCGAVD", "CIGFNLKE", "IRCGPLN", "CIGFNSMK", "IRCGINFL", 
-     "IRCGNINF", "NDSSANSP", "FTNDDNSP", "GRSKPKCG",
+     "IRCGNINF", "NDSSANSP", "NDSSDNSP", "FTNDDNSP", "GRSKPKCG",
      
      # Alcohol
      "ALCLOTTM", "ALCGTOVR", "ALCKPLMT", "ALCNDMOR", "ALCLSEFX", "ALCCUTEV",
@@ -49,118 +49,46 @@ surveydf <- raw.surveydf[, c(
      "EMPSTATY", "COUTYP2", "BOOKED"  
 )]
 
-# Drop the raw data set
-rm(raw.surveydf)
-
-# Save the final data as a CSV and the workspace 
-# Load the workspace for analyses so the data structure is retained
-write.csv(surveydf, "Data/Final Data- Drug and Health Survey Data.csv")
-save.image("Data/Final Data- Drug and Health Survey Data.RData")
-
 # Convert discrete data into factors
-surveydf.clean<-transform(surveydf,
-                          IRCGIRTB = as.factor(IRCGIRTB),
-                          IRCGCRV  = as.factor(IRCGCRV ),
-                          IRCGCRGP = as.factor(IRCGCRGP),
-                          IRCGNCTL = as.factor(IRCGNCTL),
-                          IRCGROUT = as.factor(IRCGROUT),
-                          IRCGINCR = as.factor(IRCGINCR),
-                          IRCGSAT  = as.factor(IRCGSAT ),
-                          IRCGLMR  = as.factor(IRCGLMR ),
-                          IRCGRGDY = as.factor(IRCGRGDY),
-                          IRCGRGWK = as.factor(IRCGRGWK),
-                          IRCGRGNM = as.factor(IRCGRGNM),
-                          IRCGNCG  = as.factor(IRCGNCG ),
-                          IRCGSLHR = as.factor(IRCGSLHR),
-                          IRCGAVD  = as.factor(IRCGAVD ),
-                          IRCGPLN  = as.factor(IRCGPLN ),
-                          IRCGINFL = as.factor(IRCGINFL),
-                          IRCGNINF = as.factor(IRCGNINF),
-                          CIGFNLKE = as.factor(CIGFNLKE),
-                          CIGFNSMK = as.factor(CIGFNSMK),
-                          FTNDDNSP = as.factor(FTNDDNSP),
-                          GRSKPKCG = as.factor(GRSKPKCG),
-                          ALCLOTTM = as.factor(ALCLOTTM),
-                          ALCGTOVR = as.factor(ALCGTOVR),
-                          ALCKPLMT = as.factor(ALCKPLMT),
-                          ALCNDMOR = as.factor(ALCNDMOR),
-                          ALCLSEFX = as.factor(ALCLSEFX),
-                          ALCCUTEV = as.factor(ALCCUTEV),
-                          ALCEMCTD = as.factor(ALCEMCTD),
-                          ALCPHCTD = as.factor(ALCPHCTD),
-                          ALCLSACT = as.factor(ALCLSACT),
-                          ALCWDSMT = as.factor(ALCWDSMT),
-                          DEPNDALC = as.factor(DEPNDALC),
-                          ALCSERPB = as.factor(ALCSERPB),
-                          ALCPDANG = as.factor(ALCPDANG),
-                          ALCLAWTR = as.factor(ALCLAWTR),
-                          ALCFMFPB = as.factor(ALCFMFPB),
-                          ALCFMCTD = as.factor(ALCFMCTD),
-                          ABUSEALC = as.factor(ABUSEALC),
-                          GRSKD4_5 = as.factor(GRSKD4_5),
-                          GRSKD5WK = as.factor(GRSKD5WK),
-                          MRJLOTTM = as.factor(MRJLOTTM),
-                          MRJGTOVR = as.factor(MRJGTOVR),
-                          MRJKPLMT = as.factor(MRJKPLMT),
-                          MRJNDMOR = as.factor(MRJNDMOR),
-                          MRJLSEFX = as.factor(MRJLSEFX),
-                          MRJCUTEV = as.factor(MRJCUTEV),
-                          MRJEMCTD = as.factor(MRJEMCTD),
-                          MRJPHCTD = as.factor(MRJPHCTD),
-                          MRJLSACT = as.factor(MRJLSACT),
-                          DEPNDMRJ = as.factor(DEPNDMRJ),
-                          MRJSERPB = as.factor(MRJSERPB),
-                          MRJPDANG = as.factor(MRJPDANG),
-                          MRJLAWTR = as.factor(MRJLAWTR),
-                          MRJFMCTD = as.factor(MRJFMCTD),
-                          ABUSEMRJ = as.factor(ABUSEMRJ),
-                          GRSKMOCC = as.factor(GRSKMOCC),
-                          GRSKMREG = as.factor(GRSKMREG),
-                          ABUSEILL = as.factor(ABUSEILL),
-                          ABUSEIEM = as.factor(ABUSEIEM),
-                          ABILLALC = as.factor(ABILLALC),
-                          ABILANAL = as.factor(ABILANAL),
-                          DEPNDILL = as.factor(DEPNDILL),
-                          DEPNDIEM = as.factor(DEPNDIEM),
-                          DPILLALC = as.factor(DPILLALC),
-                          DPILANAL = as.factor(DPILANAL),
-                          TXILALEV = as.factor(TXILALEV),
-                          ALCTRMT  = as.factor(ALCTRMT ),
-                          ILLTRMT  = as.factor(ILLTRMT ),
-                          TXILLALC = as.factor(TXILLALC),
-                          TXILANAL = as.factor(TXILANAL),
-                          TXLTILL2 = as.factor(TXLTILL2),
-                          AMHTXRC3 = as.factor(AMHTXRC3),
-                          DRIVALD2 = as.factor(DRIVALD2),
-                          PAROL    = as.factor(PAROL   ),
-                          PROB     = as.factor(PROB    ),
-                          ANXDLIF  = as.factor(ANXDLIF ),
-                          DEPRSLIF = as.factor(DEPRSLIF),
-                          AMDELT   = as.factor(AMDELT  ),
-                          CATAGE   = as.factor(CATAGE  ),
-                          CATAG3   = as.factor(CATAG3  ),
-                          EDUCCAT2 = as.factor(EDUCCAT2),
-                          POVERTY2 = as.factor(POVERTY2),
-                          GOVTPROG = as.factor(GOVTPROG),
-                          IRSEX    = as.factor(IRSEX   ),
-                          IRMARIT  = as.factor(IRMARIT ),
-                          EMPSTATY = as.factor(EMPSTATY),
-                          COUTYP2  = as.factor(COUTYP2 ),
-                          BOOKED   = as.factor(BOOKED  )
-                          )
-
-# Investigation of certain variables as factors
-
 # Per the survey data codebook, the cigarette variables appear to have
 # a weighted least squares regression imputation for missing values
 # if the observation contains 16 of 17 variables with coded data
 # As such, the cigarette variables have values that appear continuous
 # versus ordinal.
+col.index <- grep("^IRC", names(surveydf))
+temp.mat <- as.matrix(surveydf[, col.index])
+temp.mat[!temp.mat %in% c(1, 2, 3, 4, 5)] <- NA
+surveydf[col.index] <- temp.mat
 
-# Only IRCGROUT and IRCGRGDY have proper factor levels without imputation
-# Nicotine dependance - NDSSANSP - should be treated as a continuous variable per
-# the data codebook based upon regression imputation.
-levels(surveydf.clean$IRCGROUT) # PROPER LEVELS
-levels(surveydf.clean$IRCGRGDY) # PROPER LEVELS
-levels(surveydf.clean$NDSSANSP) # NOT A FACTOR / CONTINUOUS 
+# Convert variables to factors
+# Some go from 1-5
+vars15 <- c("IRCGIRTB", "IRCGCRV", "IRCGCRGP", "IRCGAVD", "IRCGPLN",
+          "IRCGROUT", "IRCGRGDY", "IRCGRGWK", "IRCGRGNM", "IRCGNINF", 
+          "IRCGINCR", "IRCGSAT", "IRCGLMR")
+surveydf[vars15] <- lapply(surveydf[vars15], factor, 
+                         labels = c("Not at all true of me",
+                                    "Sometiems true of me",
+                                    "Moderately true of me",
+                                    "Very true of me",
+                                    "Extremely true of me"))
+
+# The rest go from 5-1
+vars51 <- c("IRCGNCTL", "IRCGNCG", "IRCGSLHR", "IRCGINFL")
+surveydf[vars51] <- lapply(surveydf[vars51], factor, 
+                         labels = c("Extremely true of me",
+                                    "Very true of me",
+                                    "Moderately true of me",
+                                    "Sometiems true of me",
+                                    "Not at all true of me"))
+
+# Check the structure of the final data frame
+#str(surveydf)
+
+# Drop unneccesary objects
+rm(raw.surveydf, temp.mat, col.index, vars15, vars51)
+
+# Save the final data as a CSV and the workspace 
+# Load the workspace for analyses so the data structure is retained
+write.csv(surveydf, "Data/Final Data- Drug and Health Survey Data.csv")
+save.image("Data/Final Data- Drug and Health Survey Data.RData")
 

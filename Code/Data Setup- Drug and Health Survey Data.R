@@ -1,5 +1,4 @@
 # Data Setup- Drug and Health Survey Data 
-# 11/11/14
 # Pred 412
 
 # Clear the environment
@@ -46,8 +45,17 @@ surveydf <- raw.surveydf[, c(
      # Demographics
      "AMHTXRC3", "DRIVALD2", "PAROL", "PROB", "ANXDLIF", "DEPRSLIF", "AMDELT", 
      "CATAGE", "CATAG3", "EDUCCAT2", "POVERTY2", "GOVTPROG", "IRSEX", "IRMARIT", 
-     "EMPSTATY", "COUTYP2", "BOOKED"  
+     "EMPSTATY", "COUTYP2", "BOOKED", "SNRLDCSN",
+     
+     # Outcomes of Interest
+     "ABODMRJ", "MRJMON", "ABODIEM", "IEMYR"
 )]
+
+# Recode the religious variable to Strongly Agree/Agree
+surveydf$religion <- as.numeric(surveydf$SNRLDCSN == "(4) Strongly Agree" |
+                                     surveydf$SNRLDCSN == "(3) Agree")
+
+surveydf$religion <- factor(surveydf$religion, labels = c("Disagree", "Agree"))
 
 # Convert discrete data into factors
 # Per the survey data codebook, the cigarette variables appear to have

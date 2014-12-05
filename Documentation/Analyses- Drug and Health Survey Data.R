@@ -1,8 +1,6 @@
 # Analyses- Drug and Health Survey Data 
+# 11/15/14
 # Pred 412
-
-# Clear the environment
-rm(list = ls())
 
 library(MMST)
 library(ROCR)
@@ -46,27 +44,23 @@ confusion_matrix <- function(dataframe, cutoff = 0.2, plot.it = TRUE,
   
 }
 
+# Clear the environment
+rm(list = ls())
+
 # Set the working directory 
 # Note: This will need to change with each user. I'm not sure if we can set this
 # to be the Github repo. 
 setwd("/Users/kentm/Desktop/_NW MSPA/6- Fall 2014/Pred412-GroupProject")
 
 # Load the data set
-load("Data/Final Data- Drug and Health Survey Data.RData")
+load("Final Data- Drug and Health Survey Data.RData")
 
-surveydf.clean<-subset(surveydf, select = c(IEMYR, ABODIEM, 
-                                            EDUCCAT2, POVERTY2, 
-                                            GOVTPROG, IRSEX, 
-                                            IRMARIT, EMPSTATY,
-                                            PROB, DEPRSLIF, 
-                                            CATAG3, SNRLDCSN,
-                                            MRJMON, ABODMRJ,
-                                            religion))
+surveydf.clean<-subset(surveydf, select = c(ABUSEILL, EDUCCAT2, POVERTY2, GOVTPROG, IRSEX, IRMARIT, EMPSTATY))
 surveydf.clean<-na.omit(surveydf.clean)
 
 # Create a simple logistic regression model with some demographics
-illicit.drug.model <- glm(IEMYR ~ MRJMON + EDUCCAT2 + POVERTY2 + GOVTPROG + 
-                               PROB + IRSEX + IRMARIT + EMPSTATY + religion,
+illicit.drug.model <- glm(ABUSEILL ~ EDUCCAT2 + POVERTY2 +
+                               GOVTPROG + IRSEX + IRMARIT + EMPSTATY,
                           data = surveydf.clean,
                           family = binomial(link=logit))
 
@@ -74,26 +68,20 @@ illicit.drug.model <- glm(IEMYR ~ MRJMON + EDUCCAT2 + POVERTY2 + GOVTPROG +
 summary(illicit.drug.model)
 
 # Coefficients
-round(exp(cbind(Estimate=coef(illicit.drug.model),
-                confint(illicit.drug.model))),2)
+round(exp(cbind(Estimate=coef(illicit.drug.model),confint(illicit.drug.model))),2)
 
 #ANOVA
-illicit.drug.model.2 <- update(illicit.drug.model, . ~ . - 
-                                    MRJMON - EDUCCAT2 - POVERTY2 - GOVTPROG -
-                                    PROB - IRSEX - IRMARIT - EMPSTATY - religion)
+illicit.drug.model.2 <- update(illicit.drug.model, . ~ . - EDUCCAT2 - POVERTY2 - GOVTPROG - IRSEX - IRMARIT - EMPSTATY)
 anova(illicit.drug.model.2, illicit.drug.model, test="Chisq")
 
 # get predictions from model 
-surveydf.clean$score <- predict(illicit.drug.model, 
-                                data=surveydf.clean, 
-                                type = "response")
+surveydf.clean$score <- predict(illicit.drug.model, data=surveydf.clean, type = "response")
 
 # LR Confusion matrix
-surveydf.clean$dep_var<-revalue(surveydf.clean$IEMYR, c("(1) Illicit drug except for marijuana used past year"=1, 
-                                                        "(0) Never used drug/used only marijuana past year"=0))
+surveydf.clean$dep_var<-revalue(surveydf.clean$ABUSEILL, c("(1) Yes (Any source variable above=1 & DEPNDILL=0)"=1, "(0) No/Unknown (Otherwise)"=0))
 surveydf.clean$dep_var<-as.numeric(as.character(surveydf.clean$dep_var))
 
-confusion_matrix(surveydf.clean, cutoff=0.1) # lower cutoffs than default of .5 in response score
+confusion_matrix(surveydf.clean, cutoff=0.015) # lower cutoffs than default of .5 in response score
 
 # TRAIN/TEST REGIMEN
 
@@ -104,22 +92,10 @@ integer.splitter <- ifelse(integer.splitter <= 0.7,1,0) # split data 70/30 train
 train <- surveydf.clean[which(integer.splitter == 1),]
 test <- surveydf.clean[which(integer.splitter == 0),]
 
-# MAIN EFFECTS MODELS
-MyModelSpec <- {IEMYR ~ MRJMON + EDUCCAT2 + POVERTY2 + GOVTPROG + 
-                     PROB + IRSEX + IRMARIT + EMPSTATY + religion}
-
-MyModelSpec2 <- {IEMYR ~ ABODMRJ + EDUCCAT2 + POVERTY2 + GOVTPROG + 
-                     PROB + IRSEX + IRMARIT + EMPSTATY + religion}
-
-MyModelSpec3 <- {ABODIEM ~ MRJMON + EDUCCAT2 + POVERTY2 + GOVTPROG + 
-                  PROB + IRSEX + IRMARIT + EMPSTATY + religion}
-
-MyModelSpec4 <- {ABODIEM ~ ABODMRJ + EDUCCAT2 + POVERTY2 + GOVTPROG + 
-                   PROB + IRSEX + IRMARIT + EMPSTATY + religion}
+# MAIN EFFECTS MODEL
+MyModelSpec <- {ABUSEILL ~ EDUCCAT2 + POVERTY2 + GOVTPROG + IRSEX + IRMARIT + EMPSTATY}
 
 # fit model logistic regression with a few of the explanatory variables for demo
-# Switch between MyModelSpec and MyModelSpec2 to compare both methods
-# The AUCs of the model are similar (0.767 vs. 0.713 on a test set)
 model.logistic <- glm(MyModelSpec, 
                       family = binomial(link=logit), data = train)
 print(summary(model.logistic))
@@ -128,11 +104,11 @@ print(summary(model.logistic))
 predict.train.logistic <- predict(model.logistic, type = "response")
 predict.test.logistic <- predict(model.logistic, test, type = "response")
 
-train.logistic.pred <- prediction(predict.train.logistic, train$IEMYR)
+train.logistic.pred <- prediction(predict.train.logistic, train$ABUSEILL)
 train.logistic.roc <- performance(train.logistic.pred, "tpr","fpr")
 train.logistic.auc <- (performance(train.logistic.pred, "auc"))@y.values
 
-test.logistic.pred <- prediction(predict.test.logistic, test$IEMYR)
+test.logistic.pred <- prediction(predict.test.logistic, test$ABUSEILL)
 test.logistic.roc <- performance(test.logistic.pred, "tpr","fpr")
 test.logistic.auc <- (performance(test.logistic.pred, "auc"))@y.values
 
@@ -140,7 +116,6 @@ test.logistic.auc <- (performance(test.logistic.pred, "auc"))@y.values
 plot(train.logistic.roc, col = "darkgreen", main = "ROC Curves for Logistic Regression Model")
 plot(test.logistic.roc, col = "red",  add = TRUE)
 abline(c(0,1))
-
 # Draw a legend.
 train.legend <- paste("Train: AUC=", round(train.logistic.auc[[1]], digits=3))
 test.legend <- paste("Test : AUC=", round(test.logistic.auc[[1]], digits=3))
@@ -149,25 +124,33 @@ legend(0.6, 0.5, c(train.legend,test.legend), c(3,2))
 # Random Forest Method
 set.seed(9999)  # for reproducibility
 
-#divide the data into training and test sets 70/30
-set.seed(1234)
-integer.splitter <- runif(nrow(surveydf.clean))
-integer.splitter <- ifelse(integer.splitter <= 0.7,1,0) # split data 70/30 training test
-train <- surveydf.clean[which(integer.splitter == 1),]
-test <- surveydf.clean[which(integer.splitter == 0),]
 
-model.rf <- randomForest(MyModelSpec, mtry = 3, data = train)
+# Subset data frame for RF
+surveydf.rf<-subset(surveydf, select = c(ABUSEILL, ABUSEALC, GRSKD4_5, GRSKD5WK, DEPNDMRJ, ABUSEMRJ, GRSKMOCC, GRSKMREG, ABUSEIEM, ABILLALC, ABILANAL, DEPNDILL, DEPNDIEM, DPILLALC, DPILANAL, TXILALEV, ALCTRMT, ILLTRMT, TXILLALC, TXILANAL, TXLTILL2, AMHTXRC3, DRIVALD2, PAROL, PROB, ANXDLIF, DEPRSLIF, AMDELT, CATAGE, CATAG3, EDUCCAT2, POVERTY2, GOVTPROG, IRSEX, IRMARIT, EMPSTATY, COUTYP2, BOOKED))
+surveydf.rf<-na.omit(surveydf.rf)
+
+# divide into test and train 
+integer.splitter <- runif(nrow(surveydf.rf))
+integer.splitter <- ifelse(integer.splitter <= 0.7,1,0) # split data 70/30 training test
+train <- surveydf.rf[which(integer.splitter == 1),]
+test <- surveydf.rf[which(integer.splitter == 0),]
+
+#MyModelRFSpec = {ABUSEILL~ABUSEALC+GRSKD4_5+GRSKD5WK+DEPNDMRJ+ABUSEMRJ+GRSKMOCC+GRSKMREG+ABUSEIEM+ABILLALC+ABILANAL+DEPNDILL+DEPNDIEM+DPILLALC+DPILANAL+TXILALEV+ALCTRMT+ILLTRMT+TXILLALC+TXILANAL+TXLTILL2+AMHTXRC3+DRIVALD2+PAROL+PROB+ANXDLIF+DEPRSLIF+AMDELT+CATAGE+CATAG3+EDUCCAT2+POVERTY2+GOVTPROG+IRSEX+IRMARIT+EMPSTATY+COUTYP2+BOOKED}
+#MyModelRFSpec = {ABUSEILL~ABUSEALC+ABUSEMRJ+ABUSEIEM+ABILLALC+ABILANAL+DEPNDILL+EDUCCAT2+EMPSTATY}
+MyModelRFSpec = {ABUSEILL~ABUSEIEM+ABILLALC+ABILANAL+EDUCCAT2+EMPSTATY}
+
+model.rf <- randomForest(MyModelRFSpec, mtry = 3, data = train)
 print(summary(model.rf))
 print(model.rf$importance)
 
 predict.train.rf <- predict(model.rf, type = "prob")[,2]
 predict.test.rf <- predict(model.rf, test, type = "prob")[,2]
 
-train.rf.pred <- prediction(predict.train.rf, train$ABODIEM)
+train.rf.pred <- prediction(predict.train.rf, train$ABUSEILL)
 train.rf.roc <- performance(train.rf.pred, "tpr","fpr")
 train.rf.auc <- (performance(train.rf.pred, "auc"))@y.values
 
-test.rf.pred <- prediction(predict.test.rf, test$ABODIEM)
+test.rf.pred <- prediction(predict.test.rf, test$ABUSEILL)
 test.rf.roc <- performance(test.rf.pred, "tpr","fpr")
 test.rf.auc <- (performance(test.rf.pred, "auc"))@y.values
 
@@ -182,11 +165,11 @@ legend(0.6, 0.5, c(train.legend,test.legend), c(3,2))
 
 # RF Confusion matrix
 
-train$dep_var<-revalue(train$IEMYR, c("(1) Illicit drug except for marijuana used past year"=1, "(0) Never used drug/used only marijuana past year"=0))
+train$dep_var<-revalue(train$ABUSEILL, c("(1) Yes (Any source variable above=1 & DEPNDILL=0)"=1, "(0) No/Unknown (Otherwise)"=0))
 train$dep_var<-as.numeric(as.character(train$dep_var))
 train$score <- predict(model.rf, type = "prob")[,2]
 
-confusion_matrix(train, cutoff=0.7) # higher cutoffs than default of .5 in response score
+confusion_matrix(train, cutoff=0.5) # higher cutoffs than default of .5 in response score
 
 # Logistic Regression with RF variables
 
